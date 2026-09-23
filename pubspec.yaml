@@ -1,0 +1,46 @@
+name: dorm_ease
+description: "แอปจัดการหอพัก DormEase - โปรเจกต์รวมเนื้อหาจากบทเรียน Flutter"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # --- State Management (Lecture 7) ---
+  provider: ^6.1.2
+
+  # --- Form Builder & Validation (Lecture 6) ---
+  flutter_form_builder: ^10.3.0+2
+  form_builder_validators: ^11.0.0
+
+  # --- REST API (Lecture 8) ---
+  http: ^1.2.2
+
+  # --- Shared Storage (Lecture 9) ---
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
+
+  # --- Cloud Storage / Firebase (Lecture 10 & 11) ---
+  firebase_core: ^3.11.0
+  cloud_firestore: ^5.6.12
+  firebase_auth: ^5.4.2
+
+  # --- Utilities ---
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  fl_chart: ^0.69.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
