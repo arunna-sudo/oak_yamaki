@@ -25,6 +25,9 @@ class MaintenanceService {
   }
 
   Future<void> updateStatus(String id, MaintenanceStatus status) async {
-    await _collection.doc(id).update({'status': status.name});
+    await _collection.doc(id).update({
+      'status': status.name,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
   }
 }

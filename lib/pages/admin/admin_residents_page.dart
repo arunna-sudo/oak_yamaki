@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../models/user_model.dart';
 import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
@@ -27,7 +28,7 @@ class AdminResidentsPage extends StatelessWidget {
           final residents = snapshot.data ?? [];
           if (residents.isEmpty) {
             return const EmptyStateWidget(
-              icon: Icons.groups_outlined,
+              icon: PhosphorIconsRegular.usersThree,
               title: 'ยังไม่มีผู้พักในระบบ',
             );
           }

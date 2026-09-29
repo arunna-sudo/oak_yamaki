@@ -47,4 +47,16 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keySeenOnboarding) ?? false;
   }
+
+  /// เวลาที่ผู้ใช้เปิดหน้าแจ้งเตือนล่าสุด (เก็บแยกตาม uid) ใช้คำนวณจำนวนที่ยังไม่ได้อ่าน
+  Future<void> saveNotificationsSeenAt(String uid, DateTime time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('notifications_seen_at_$uid', time.toIso8601String());
+  }
+
+  Future<DateTime?> getNotificationsSeenAt(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('notifications_seen_at_$uid');
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
 }

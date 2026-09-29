@@ -28,6 +28,25 @@ class BillService {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
   }
 
+  /// บิลล่าสุดของผู้พัก (ใช้เติมเลขมิเตอร์ครั้งก่อนให้อัตโนมัติตอนออกบิลใหม่)
+  Future<BillModel?> getLatestBill(String email) async {
+    final snap = await _collectionFor(email)
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+    if (snap.docs.isEmpty) return null;
+    return BillModel.fromJson(snap.docs.first.data(), snap.docs.first.id);
+  }
+
+  /// เช็คว่าผู้พักคนนี้มีบิลของเดือนนี้อยู่แล้วหรือยัง (กันออกบิลซ้ำโดยไม่ตั้งใจ)
+  Future<bool> billExistsForMonth(String email, String month) async {
+    final snap = await _collectionFor(email)
+        .where('month', isEqualTo: month)
+        .limit(1)
+        .get();
+    return snap.docs.isNotEmpty;
+  }
+
   Future<void> addBill(String email, BillModel bill) async {
     await _collectionFor(email).add(bill.toJson());
   }
@@ -43,6 +62,7 @@ class BillService {
   Future<void> reviewSlip(String email, String billId, bool approved) async {
     await _collectionFor(email).doc(billId).update({
       'status': (approved ? BillStatus.approved : BillStatus.rejected).name,
+      'reviewedAt': DateTime.now().toIso8601String(),
     });
   }
 

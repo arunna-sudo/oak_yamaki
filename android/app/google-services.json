@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280008336584",
+    "project_id": "sealoveboo",
+    "storage_bucket": "sealoveboo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280008336584:android:4efde7bae21084dd89b1fd",
+        "android_client_info": {
+          "package_name": "com.example.oak_yamasaki"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfjnRhXqUoMWPT9umffBdTUxzTwmXN8PI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

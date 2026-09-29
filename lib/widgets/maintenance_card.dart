@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/maintenance_model.dart';
 import '../utils/app_theme.dart';
@@ -19,13 +20,13 @@ class MaintenanceCard extends StatelessWidget {
   IconData get _categoryIcon {
     switch (request.category) {
       case 'ไฟฟ้า':
-        return Icons.bolt;
+        return PhosphorIconsRegular.lightning;
       case 'ประปา':
-        return Icons.water_drop;
+        return PhosphorIconsRegular.drop;
       case 'เครื่องใช้ไฟฟ้า':
-        return Icons.kitchen;
+        return PhosphorIconsRegular.cookingPot;
       default:
-        return Icons.build;
+        return PhosphorIconsRegular.wrench;
     }
   }
 

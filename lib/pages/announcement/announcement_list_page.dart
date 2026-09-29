@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/announcement_provider.dart';
@@ -22,7 +23,7 @@ class AnnouncementListPage extends StatelessWidget {
       appBar: AppBar(title: const Text('ประกาศจากหอพัก')),
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
-              icon: const Icon(Icons.add),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.plus),
               label: const Text('ประกาศใหม่'),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CreateAnnouncementPage()),
@@ -33,7 +34,7 @@ class AnnouncementListPage extends StatelessWidget {
           ? const LoadingWidget()
           : provider.announcements.isEmpty
               ? const EmptyStateWidget(
-                  icon: Icons.campaign_outlined,
+                  icon: PhosphorIconsRegular.megaphoneSimple,
                   title: 'ยังไม่มีประกาศ',
                   subtitle: 'เมื่อผู้ดูแลหอพักประกาศเรื่องสำคัญ จะแสดงที่นี่',
                 )

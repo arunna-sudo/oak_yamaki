@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/bill_model.dart';
+import '../../models/user_model.dart';
 import '../../providers/bill_provider.dart';
 import '../../services/bill_service.dart';
 import '../../services/user_service.dart';
 import '../../utils/app_theme.dart';
+import '../../widgets/image_viewer_page.dart';
 import '../../widgets/loading_widget.dart';
 
 /// AdminSlipReviewPage: เมนูเฉพาะผู้ดูแลหอพัก (admin) สำหรับ "ตรวจสลิปโอนเงิน"
@@ -27,6 +30,7 @@ class _AdminSlipReviewPageState extends State<AdminSlipReviewPage> {
   final BillService _billService = BillService();
   bool _loading = true;
   List<MapEntry<String, BillModel>> _pending = [];
+  Map<String, UserModel> _residentsByEmail = {};
 
   @override
   void initState() {
@@ -46,6 +50,7 @@ class _AdminSlipReviewPageState extends State<AdminSlipReviewPage> {
       if (!mounted) return;
       setState(() {
         _pending = pending;
+        _residentsByEmail = {for (final r in residents) r.email: r};
         _loading = false;
       });
     } catch (e) {
@@ -75,6 +80,12 @@ class _AdminSlipReviewPageState extends State<AdminSlipReviewPage> {
     );
   }
 
+  String _residentLabel(String email) {
+    final resident = _residentsByEmail[email];
+    if (resident == null) return email;
+    return resident.room.isNotEmpty ? 'ห้อง ${resident.room} · ${resident.name}' : resident.name;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currency = NumberFormat.currency(locale: 'th', symbol: '฿', decimalDigits: 2);
@@ -83,14 +94,14 @@ class _AdminSlipReviewPageState extends State<AdminSlipReviewPage> {
       appBar: AppBar(
         title: const Text('ตรวจสอบสลิปโอนเงิน'),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadPendingSlips),
+          IconButton(icon: const PhosphorIcon(PhosphorIconsDuotone.arrowsClockwise), onPressed: _loadPendingSlips),
         ],
       ),
       body: _loading
           ? const LoadingWidget(message: 'กำลังโหลดสลิปที่รอตรวจสอบ...')
           : _pending.isEmpty
               ? const EmptyStateWidget(
-                  icon: Icons.fact_check_outlined,
+                  icon: PhosphorIconsRegular.checkSquareOffset,
                   title: 'ไม่มีสลิปที่รอตรวจสอบ',
                   subtitle: 'เมื่อผู้พักส่งสลิปใหม่ จะปรากฏที่นี่',
                 )
@@ -107,18 +118,54 @@ class _AdminSlipReviewPageState extends State<AdminSlipReviewPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(email, style: const TextStyle(fontWeight: FontWeight.w700)),
+                            Text(_residentLabel(email),
+                                style: const TextStyle(fontWeight: FontWeight.w700)),
                             Text('บิลเดือน ${bill.month} • ${currency.format(bill.totalAmount)}',
                                 style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
                             const SizedBox(height: 12),
                             if (bill.slipImageBase64 != null)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: Image.memory(
-                                  const Base64Decoder().convert(bill.slipImageBase64!),
-                                  height: 180,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
+                              GestureDetector(
+                                onTap: () => ImageViewerPage.open(
+                                  context,
+                                  [bill.slipImageBase64!],
+                                  title: 'สลิป ${_residentLabel(email)}',
+                                  allowSave: true,
+                                  fileName: 'slip_${bill.month}',
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Stack(
+                                    children: [
+                                      Image.memory(
+                                        base64Decode(bill.slipImageBase64!),
+                                        height: 180,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Positioned(
+                                        right: 8,
+                                        bottom: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              PhosphorIcon(PhosphorIconsDuotone.magnifyingGlassPlus, color: Colors.white, size: 16),
+                                              SizedBox(width: 4),
+                                              Text('แตะเพื่อดูรูปเต็ม',
+                                                  style: TextStyle(
+                                                      color: Colors.white, fontSize: 12)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             const SizedBox(height: 12),

@@ -29,6 +29,7 @@ class AnnouncementProvider extends ChangeNotifier with LoadingStateMixin {
     required String createdByName,
     required String createdByUid,
     bool pinned = false,
+    String? imageBase64,
   }) async {
     final result = await runWithLoading(() async {
       await _service.createAnnouncement(AnnouncementModel(
@@ -38,6 +39,7 @@ class AnnouncementProvider extends ChangeNotifier with LoadingStateMixin {
         createdByName: createdByName,
         createdByUid: createdByUid,
         pinned: pinned,
+        imageBase64: imageBase64,
         createdAt: DateTime.now(),
       ));
       return true;

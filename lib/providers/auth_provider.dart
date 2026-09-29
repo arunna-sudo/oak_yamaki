@@ -65,6 +65,7 @@ class AuthProvider extends ChangeNotifier with LoadingStateMixin {
         room: room,
         role: 'resident',
         createdAt: DateTime.now(),
+        isApproved: false, // ต้องรอแอดมินยืนยันก่อนถึงจะเข้าใช้งานแอปได้
       );
       await _userService.createUserProfile(newUser);
       await _secureStorage.saveLoginSession(uid: uid, email: email);
@@ -88,6 +89,30 @@ class AuthProvider extends ChangeNotifier with LoadingStateMixin {
       return true;
     });
     return result ?? false;
+  }
+
+  /// แก้ไขข้อมูลส่วนตัว (ชื่อ/เบอร์โทร) ทั้งใน Firestore และใน state ของแอป
+  /// คืนค่า true เมื่อบันทึกสำเร็จ
+  Future<bool> updateProfile({required String name, required String phone}) async {
+    final current = _userProfile;
+    if (current == null) return false;
+    try {
+      await _userService.updateProfile(current.uid, {'name': name, 'phone': phone});
+      _userProfile = current.copyWith(name: name, phone: phone);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// เรียกซ้ำเพื่อเช็คสถานะล่าสุด เช่น หลังแอดมินกดยืนยันบัญชีแล้ว
+  /// ผู้ใช้กดปุ่ม "ตรวจสอบสถานะอีกครั้ง" ที่หน้ารออนุมัติ
+  Future<void> refreshProfile() async {
+    final uid = _firebaseUser?.uid;
+    if (uid == null) return;
+    _userProfile = await _userService.getUserProfile(uid);
+    notifyListeners();
   }
 
   Future<void> logout() async {

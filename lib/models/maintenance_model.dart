@@ -20,7 +20,9 @@ class MaintenanceModel {
   final String urgency; // ต่ำ, ปานกลาง, สูง
   final MaintenanceStatus status;
   final DateTime? preferredDate;
+  final List<String> imagesBase64; // รูปประกอบ (ไม่บังคับ) เก็บเป็น base64
   final DateTime createdAt;
+  final DateTime? updatedAt; // เวลาที่สถานะเปลี่ยนล่าสุด
 
   MaintenanceModel({
     required this.id,
@@ -32,7 +34,9 @@ class MaintenanceModel {
     required this.urgency,
     required this.status,
     this.preferredDate,
+    this.imagesBase64 = const [],
     required this.createdAt,
+    this.updatedAt,
   });
 
   factory MaintenanceModel.fromJson(Map<String, dynamic> json, String id) {
@@ -48,9 +52,14 @@ class MaintenanceModel {
       preferredDate: json['preferredDate'] != null
           ? DateTime.tryParse(json['preferredDate'].toString())
           : null,
+      imagesBase64:
+          (json['imagesBase64'] as List?)?.map((e) => e.toString()).toList() ?? const [],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
     );
   }
 
@@ -64,7 +73,9 @@ class MaintenanceModel {
       'urgency': urgency,
       'status': status.name,
       'preferredDate': preferredDate?.toIso8601String(),
+      'imagesBase64': imagesBase64,
       'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

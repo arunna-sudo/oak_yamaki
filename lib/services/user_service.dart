@@ -34,4 +34,26 @@ class UserService {
         .map((d) => UserModel.fromJson(d.data(), d.id))
         .toList());
   }
+
+  /// ใช้โดย Admin เท่านั้น: ดูรายชื่อผู้พักที่เพิ่งสมัครและยังรอการยืนยัน
+  /// เรียงตามเวลาสมัคร (คนที่สมัครก่อนขึ้นก่อน) โดยกรองสถานะ isApproved
+  /// และบทบาท (admin ไม่ต้องรอยืนยัน) ฝั่ง client เพื่อเลี่ยงการทำ composite index
+  Stream<List<UserModel>> watchPendingResidents() {
+    return _collection.snapshots().map((snap) => snap.docs
+        .map((d) => UserModel.fromJson(d.data(), d.id))
+        .where((u) => !u.isApproved && !u.isAdmin)
+        .toList()
+      ..sort((a, b) => (a.createdAt ?? DateTime.now())
+          .compareTo(b.createdAt ?? DateTime.now())));
+  }
+
+  /// แอดมินกดยืนยันผู้พักใหม่ ทำให้เข้าใช้งานแอปได้
+  Future<void> approveResident(String uid) async {
+    await _collection.doc(uid).update({'isApproved': true});
+  }
+
+  /// แอดมินปฏิเสธการสมัคร ลบโปรไฟล์ผู้พักออกจากระบบ
+  Future<void> rejectResident(String uid) async {
+    await _collection.doc(uid).delete();
+  }
 }

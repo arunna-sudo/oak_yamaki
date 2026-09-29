@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/local_storage_service.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/validators.dart';
+import '../../widgets/auth_hero.dart';
 import 'register_page.dart';
 
 /// LoginPage สาธิตการสร้างฟอร์มด้วย flutter_form_builder (Lecture 6)
@@ -88,24 +90,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Icon(Icons.apartment, color: AppColors.primary, size: 32),
-              ),
-              const SizedBox(height: 20),
-              const Text('ยินดีต้อนรับกลับ',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 6),
-              const Text(
-                'เข้าสู่ระบบเพื่อจัดการห้องพักของคุณ',
-                style: TextStyle(color: AppColors.textMuted),
-              ),
+              const AuthHero(title: 'ยินดีต้อนรับกลับ', subtitle: 'เข้าสู่ระบบเพื่อจัดการห้องพักของคุณ'),
               const SizedBox(height: 28),
               FormBuilder(
                 key: _formKey,
@@ -118,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'อีเมล',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: PhosphorIcon(PhosphorIconsDuotone.envelopeSimple),
                       ),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: FormBuilderValidators.compose([
@@ -132,11 +117,11 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'รหัสผ่าน',
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const PhosphorIcon(PhosphorIconsDuotone.lock),
                         suffixIcon: IconButton(
                           icon: Icon(_obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
+                              ? PhosphorIconsRegular.eye
+                              : PhosphorIconsRegular.eyeSlash),
                           onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                         ),
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/bill_model.dart';
 import '../utils/app_theme.dart';
@@ -29,7 +30,7 @@ class BillCard extends StatelessWidget {
                   color: AppColors.accentLight,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.bolt, color: AppColors.accent),
+                child: const PhosphorIcon(PhosphorIconsDuotone.lightning, color: AppColors.accent),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -39,7 +40,10 @@ class BillCard extends StatelessWidget {
                     Text('บิลประจำเดือน ${bill.month}',
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 4),
-                    Text('${bill.unitsUsed.toStringAsFixed(1)} หน่วย',
+                    Text(
+                        bill.waterUnitsUsed > 0
+                            ? 'ไฟ ${bill.unitsUsed.toStringAsFixed(1)} • น้ำ ${bill.waterUnitsUsed.toStringAsFixed(1)} หน่วย'
+                            : 'ไฟ ${bill.unitsUsed.toStringAsFixed(1)} หน่วย',
                         style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                   ],
                 ),

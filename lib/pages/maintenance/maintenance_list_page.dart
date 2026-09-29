@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/maintenance_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/maintenance_provider.dart';
 import '../../utils/app_theme.dart';
+import '../../widgets/list_reveal.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/maintenance_card.dart';
 import 'create_maintenance_page.dart';
@@ -43,7 +45,7 @@ class _MaintenanceListPageState extends State<MaintenanceListPage> {
       floatingActionButton: isAdmin
           ? null
           : FloatingActionButton.extended(
-              icon: const Icon(Icons.add),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.plus),
               label: const Text('แจ้งซ่อม'),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CreateMaintenancePage()),
@@ -53,7 +55,7 @@ class _MaintenanceListPageState extends State<MaintenanceListPage> {
           ? const LoadingWidget()
           : provider.requests.isEmpty
               ? EmptyStateWidget(
-                  icon: Icons.build_outlined,
+                  icon: PhosphorIconsRegular.wrench,
                   title: isAdmin ? 'ยังไม่มีคำขอแจ้งซ่อม' : 'ยังไม่มีรายการแจ้งซ่อม',
                   subtitle: isAdmin ? null : 'พบปัญหาในห้องพัก? กดปุ่ม "แจ้งซ่อม" ด้านล่างได้เลย',
                 )
@@ -63,12 +65,16 @@ class _MaintenanceListPageState extends State<MaintenanceListPage> {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final request = provider.requests[index];
-                    return MaintenanceCard(
-                      request: request,
-                      showRoom: isAdmin,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => MaintenanceDetailPage(request: request, isAdmin: isAdmin),
+                    return ListReveal(
+                      index: index,
+                      slideFromBottom: true,
+                      child: MaintenanceCard(
+                        request: request,
+                        showRoom: isAdmin,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => MaintenanceDetailPage(request: request, isAdmin: isAdmin),
+                          ),
                         ),
                       ),
                     );

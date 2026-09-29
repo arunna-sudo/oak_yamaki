@@ -1,160 +1,194 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// ธีมและโทนสีหลักของแอป DormEase
-/// แนวคิด: โทนสี "Terracotta & Deep Teal" ให้ความรู้สึกอบอุ่นเหมือนบ้าน
-/// แต่ยังดูทันสมัย เหมาะกับแอปจัดการหอพัก
+/// ธีม DormEase v2: โทน "Periwinkle & Candy" ฟ้าม่วงอ่อนนุ่ม + สีพาสเทลสดใส
+/// ฟอนต์ Anuphan รองรับไทย/อังกฤษในตระกูลเดียว
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF2A6F6F); // Deep teal
-  static const Color primaryDark = Color(0xFF184C4C);
-  static const Color primaryLight = Color(0xFFDCEDED);
+  static const Color primary = Color(0xFF5B5BF0); // Indigo
+  static const Color primaryDark = Color(0xFF3B39C9);
+  static const Color primaryLight = Color(0xFFE7E8FF);
 
-  static const Color accent = Color(0xFFE0703B); // Terracotta / warm orange
-  static const Color accentLight = Color(0xFFFBE6DA);
+  static const Color accent = Color(0xFFFF7A8A); // Coral pink
+  static const Color accentLight = Color(0xFFFFE6EA);
 
-  static const Color success = Color(0xFF3AA76D);
-  static const Color warning = Color(0xFFE0A83B);
-  static const Color danger = Color(0xFFD8564A);
+  static const Color success = Color(0xFF2FBF8F);
+  static const Color warning = Color(0xFFFFB259);
+  static const Color danger = Color(0xFFFF5D6C);
 
-  static const Color bg = Color(0xFFF6F5F1);
+  // สีพาสเทลเสริมสำหรับไอคอน/แท็ก
+  static const Color sky = Color(0xFF29C9EE);
+  static const Color violet = Color(0xFFB56CF2);
+  static const Color peach = Color(0xFFFFA45C);
+
+  static const Color bg = Color(0xFFF3F4FC);
   static const Color card = Color(0xFFFFFFFF);
-  static const Color textDark = Color(0xFF23302F);
-  static const Color textMuted = Color(0xFF6F7E7C);
+  static const Color textDark = Color(0xFF1E2140);
+  static const Color textMuted = Color(0xFF7A7F9E);
 
-  // Dark theme palette
-  static const Color darkBg = Color(0xFF12181A);
-  static const Color darkCard = Color(0xFF1C2426);
-  static const Color darkTextMuted = Color(0xFFA7B3B1);
+  static const Color darkBg = Color(0xFF111228);
+  static const Color darkCard = Color(0xFF1B1D3B);
+  static const Color darkTextMuted = Color(0xFFA5A9C9);
+
+  // เส้นขอบ/เส้นแบ่งบาง ๆ ใช้กับ Divider และกรอบช่องกรอกข้อมูล
+  static const Color border = Color(0xFFE2E4F5);
+  static const Color darkBorder = Color(0xFF2E3160);
+
+  // ไล่สีอินดิโกสำหรับส่วนหัว (การ์ดหอพัก, hero ของหน้า auth ฯลฯ)
+  static const LinearGradient heroGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF6C6CF7), Color(0xFF4A45D8)],
+  );
+
+  /// เงานุ่มแบบอมม่วง แทนเงาเทาทั่วไป
+  static List<BoxShadow> softShadow([Color c = primary]) => [
+        BoxShadow(color: c.withOpacity(0.10), blurRadius: 24, offset: const Offset(0, 10)),
+      ];
+}
+
+/// เปลี่ยนหน้า: หน้าใหม่เลื่อนเข้าจากขวาเล็กน้อย + จางเข้า, หน้าเดิมเลื่อนถอยเบา ๆ
+class _SoftSlideTransitions extends PageTransitionsBuilder {
+  const _SoftSlideTransitions();
+
+  @override
+  Widget buildTransitions<T>(PageRoute<T> route, BuildContext context,
+      Animation<double> animation, Animation<double> secondary, Widget child) {
+    final inCurve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    final outCurve = CurvedAnimation(parent: secondary, curve: Curves.easeOutCubic);
+    return SlideTransition(
+      position: Tween(begin: Offset.zero, end: const Offset(-0.08, 0)).animate(outCurve),
+      child: FadeTransition(
+        opacity: Tween(begin: 1.0, end: 0.6).animate(outCurve),
+        child: SlideTransition(
+          position: Tween(begin: const Offset(0.12, 0), end: Offset.zero).animate(inCurve),
+          child: FadeTransition(opacity: inCurve, child: child),
+        ),
+      ),
+    );
+  }
 }
 
 class AppTheme {
   AppTheme._();
 
-  static ThemeData light() {
-    final base = ThemeData.light(useMaterial3: true);
+  static const _transitions = PageTransitionsTheme(builders: {
+    TargetPlatform.android: _SoftSlideTransitions(),
+    TargetPlatform.iOS: _SoftSlideTransitions(),
+    TargetPlatform.windows: _SoftSlideTransitions(),
+    TargetPlatform.macOS: _SoftSlideTransitions(),
+    TargetPlatform.linux: _SoftSlideTransitions(),
+    TargetPlatform.fuchsia: _SoftSlideTransitions(),
+  });
+
+  static ThemeData _build(Brightness b) {
+    final dark = b == Brightness.dark;
+    final base = ThemeData(brightness: b, useMaterial3: true);
+    final ink = dark ? Colors.white : AppColors.textDark;
+    final bg = dark ? AppColors.darkBg : AppColors.bg;
+    final card = dark ? AppColors.darkCard : AppColors.card;
+    final primary = dark ? const Color(0xFF8C8CFF) : AppColors.primary;
+    final border = dark ? const Color(0xFF2E3160) : const Color(0xFFE2E4F5);
+
+    final text = GoogleFonts.anuphanTextTheme(base.textTheme)
+        .apply(bodyColor: ink, displayColor: ink);
+
+    OutlineInputBorder ob(Color c, [double w = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: c, width: w),
+        );
+
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.bg,
+      scaffoldBackgroundColor: bg,
+      textTheme: text,
+      primaryTextTheme: text,
+      pageTransitionsTheme: _transitions,
+      splashFactory: InkSparkle.splashFactory,
       colorScheme: base.colorScheme.copyWith(
-        primary: AppColors.primary,
+        primary: primary,
         secondary: AppColors.accent,
-        surface: AppColors.card,
+        surface: card,
         error: AppColors.danger,
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.bg,
-        foregroundColor: AppColors.textDark,
+      appBarTheme: AppBarTheme(
+        backgroundColor: bg,
+        foregroundColor: ink,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: AppColors.textDark,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      textTheme: base.textTheme.apply(
-        bodyColor: AppColors.textDark,
-        displayColor: AppColors.textDark,
+        titleTextStyle: text.titleLarge?.copyWith(
+            color: ink, fontSize: 21, fontWeight: FontWeight.w700, letterSpacing: -0.2),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.card,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        color: card,
+        elevation: dark ? 0 : 4,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: AppColors.primary.withOpacity(0.14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
         margin: EdgeInsets.zero,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.danger, width: 1.2),
-        ),
+        fillColor: card,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        border: ob(border),
+        enabledBorder: ob(border),
+        focusedBorder: ob(primary, 1.8),
+        errorBorder: ob(AppColors.danger, 1.2),
+        focusedErrorBorder: ob(AppColors.danger, 1.8),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          backgroundColor: primary,
+          foregroundColor: dark ? AppColors.darkBg : Colors.white,
+          minimumSize: const Size.fromHeight(54),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          textStyle: GoogleFonts.anuphan(fontWeight: FontWeight.w700, fontSize: 16),
           elevation: 0,
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.accent,
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primary,
+          minimumSize: const Size.fromHeight(54),
+          side: BorderSide(color: border, width: 1.4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          textStyle: GoogleFonts.anuphan(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
         foregroundColor: Colors.white,
+        elevation: 0,
+        highlightElevation: 0,
+        extendedTextStyle: GoogleFonts.anuphan(fontWeight: FontWeight.w700, fontSize: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMuted,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
+      chipTheme: base.chipTheme.copyWith(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        side: BorderSide(color: border),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: card,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: dark ? const Color(0xFF2B2E5E) : AppColors.textDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      dividerTheme: DividerThemeData(color: border, space: 1),
     );
   }
 
-  static ThemeData dark() {
-    final base = ThemeData.dark(useMaterial3: true);
-    return base.copyWith(
-      scaffoldBackgroundColor: AppColors.darkBg,
-      colorScheme: base.colorScheme.copyWith(
-        primary: const Color(0xFF5FB8B8),
-        secondary: AppColors.accent,
-        surface: AppColors.darkCard,
-        error: AppColors.danger,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.darkBg,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: AppColors.darkCard,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        margin: EdgeInsets.zero,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF5FB8B8),
-          foregroundColor: Colors.black,
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-          elevation: 0,
-        ),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.darkCard,
-        selectedItemColor: Color(0xFF5FB8B8),
-        unselectedItemColor: AppColors.darkTextMuted,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-      ),
-    );
-  }
+  static ThemeData light() => _build(Brightness.light);
+  static ThemeData dark() => _build(Brightness.dark);
 }
 
 /// ระยะขอบ/รัศมีมุมมาตรฐาน เพื่อให้ UI ทุกหน้าไปในทิศทางเดียวกัน
@@ -165,5 +199,5 @@ class AppSpacing {
   static const double md = 16;
   static const double lg = 24;
   static const double xl = 32;
-  static const double radius = 18;
+  static const double radius = 24;
 }

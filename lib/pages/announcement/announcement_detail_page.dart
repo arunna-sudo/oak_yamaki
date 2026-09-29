@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../models/announcement_model.dart';
 import '../../utils/app_theme.dart';
+import '../../widgets/base64_image.dart';
 
 class AnnouncementDetailPage extends StatelessWidget {
   final AnnouncementModel announcement;
@@ -24,7 +26,7 @@ class AnnouncementDetailPage extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.push_pin, size: 16, color: AppColors.accent),
+                    PhosphorIcon(PhosphorIconsDuotone.pushPin, size: 16, color: AppColors.accent),
                     SizedBox(width: 4),
                     Text('ประกาศปักหมุด',
                         style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700)),
@@ -39,7 +41,7 @@ class AnnouncementDetailPage extends StatelessWidget {
                 const CircleAvatar(
                   radius: 14,
                   backgroundColor: AppColors.primaryLight,
-                  child: Icon(Icons.campaign, size: 16, color: AppColors.primary),
+                  child: PhosphorIcon(PhosphorIconsDuotone.megaphoneSimple, size: 16, color: AppColors.primary),
                 ),
                 const SizedBox(width: 8),
                 Text(announcement.createdByName, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -48,6 +50,17 @@ class AnnouncementDetailPage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(dateStr, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
             const Divider(height: 32),
+            if (announcement.imageBase64 != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radius),
+                child: Base64Image(
+                  data: announcement.imageBase64!,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             Text(announcement.body, style: const TextStyle(fontSize: 15, height: 1.6)),
           ],
         ),

@@ -1,14 +1,17 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert';
 
 import '../../models/bill_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/bill_provider.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/image_saver.dart';
+import '../../widgets/image_viewer_page.dart';
 import '../../widgets/status_chip.dart';
 
 /// BillDetailPage สาธิตการใช้ image_picker เพื่อเลือกรูปสลิปโอนเงิน
@@ -68,11 +71,26 @@ class _BillDetailPageState extends State<BillDetailPage> {
     }
   }
 
+  Future<void> _saveSlip() async {
+    final ok = await ImageSaver.saveBase64(
+      widget.bill.slipImageBase64!,
+      fileName: 'slip_${widget.bill.month}',
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'บันทึกสลิปเรียบร้อยแล้ว' : 'บันทึกสลิปไม่สำเร็จ'),
+        backgroundColor: ok ? AppColors.success : AppColors.danger,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bill = widget.bill;
     final currency = NumberFormat.currency(locale: 'th', symbol: '฿', decimalDigits: 2);
     final canUploadSlip = bill.status == BillStatus.unpaid || bill.status == BillStatus.rejected;
+    final hasWater = bill.waterAmount > 0 || bill.waterUnitsUsed > 0;
 
     return Scaffold(
       appBar: AppBar(title: Text('บิลเดือน ${bill.month}')),
@@ -107,21 +125,37 @@ class _BillDetailPageState extends State<BillDetailPage> {
               ),
             ),
             const SizedBox(height: 20),
-            _detailRow('เลขมิเตอร์ครั้งก่อน', '${bill.previousUnit.toStringAsFixed(1)} หน่วย'),
-            _detailRow('เลขมิเตอร์ครั้งนี้', '${bill.currentUnit.toStringAsFixed(1)} หน่วย'),
-            _detailRow('หน่วยที่ใช้ไป', '${bill.unitsUsed.toStringAsFixed(1)} หน่วย'),
+            const _SectionLabel(icon: PhosphorIconsRegular.lightning, label: 'ค่าไฟฟ้า', color: AppColors.accent),
+            _detailRow('ใช้ไป', '${bill.unitsUsed.toStringAsFixed(1)} หน่วย'),
             _detailRow('ค่าไฟฟ้า', currency.format(bill.electricityAmount)),
+            if (hasWater) ...[
+              const SizedBox(height: 12),
+              const _SectionLabel(icon: PhosphorIconsRegular.drop, label: 'ค่าน้ำ', color: Color(0xFF2F80ED)),
+              _detailRow('ใช้ไป', '${bill.waterUnitsUsed.toStringAsFixed(1)} หน่วย'),
+              _detailRow('อัตราค่าน้ำ', '${bill.waterRate.toStringAsFixed(2)} บาท/หน่วย'),
+              _detailRow('ค่าน้ำ', currency.format(bill.waterAmount)),
+            ],
+            const SizedBox(height: 12),
             _detailRow('ค่าเช่าห้อง', currency.format(bill.roomRent)),
             const Divider(height: 32),
             const Text('หลักฐานการโอนเงิน (สลิป)',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
             const SizedBox(height: 12),
             if (bill.slipImageBase64 != null && _pickedBytes == null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.radius),
-                child: Image.memory(
-                  const Base64Decoder().convert(bill.slipImageBase64!),
-                  fit: BoxFit.cover,
+              GestureDetector(
+                onTap: () => ImageViewerPage.open(
+                  context,
+                  [bill.slipImageBase64!],
+                  title: 'สลิปโอนเงิน',
+                  allowSave: true,
+                  fileName: 'slip_${bill.month}',
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSpacing.radius),
+                  child: Image.memory(
+                    base64Decode(bill.slipImageBase64!),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               )
             else if (_pickedBytes != null)
@@ -137,17 +171,29 @@ class _BillDetailPageState extends State<BillDetailPage> {
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(AppSpacing.radius),
-                    border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                    border: Border.all(color: Theme.of(context).dividerColor),
                   ),
                   child: const Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.upload_file, color: AppColors.textMuted, size: 32),
+                        PhosphorIcon(PhosphorIconsDuotone.uploadSimple, color: AppColors.textMuted, size: 32),
                         SizedBox(height: 8),
                         Text('แตะเพื่อเลือกรูปสลิป', style: TextStyle(color: AppColors.textMuted)),
                       ],
                     ),
+                  ),
+                ),
+              ),
+            if (bill.slipImageBase64 != null && _pickedBytes == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.downloadSimple),
+                    label: const Text('บันทึกสลิปลงเครื่อง'),
+                    onPressed: _saveSlip,
                   ),
                 ),
               ),
@@ -180,7 +226,7 @@ class _BillDetailPageState extends State<BillDetailPage> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    icon: const Icon(Icons.photo_library_outlined),
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.images),
                     label: const Text('เลือกรูปสลิปจากคลังภาพ'),
                     onPressed: _pickImage,
                   ),
@@ -211,6 +257,28 @@ class _BillDetailPageState extends State<BillDetailPage> {
         children: [
           Text(label, style: const TextStyle(color: AppColors.textMuted)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _SectionLabel({required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
         ],
       ),
     );

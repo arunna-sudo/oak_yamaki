@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../utils/app_theme.dart';
 import '../admin/admin_residents_page.dart';
+import 'about_project_page.dart';
+import 'edit_profile_page.dart';
 
 /// ProfilePage รวมฟีเจอร์:
 /// - แสดงข้อมูลผู้ใช้จาก AuthProvider (Firebase Auth + Firestore "users")
@@ -76,10 +79,26 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text('ข้อมูลติดต่อ', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-          const SizedBox(height: 10),
-          _InfoTile(icon: Icons.phone_outlined, label: 'เบอร์โทรศัพท์', value: user?.phone ?? '-'),
-          _InfoTile(icon: Icons.meeting_room_outlined, label: 'ห้องพัก', value: user?.room ?? '-'),
+          Row(
+            children: [
+              const Expanded(
+                child: Text('ข้อมูลติดต่อ',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+              ),
+              TextButton.icon(
+                icon: const PhosphorIcon(PhosphorIconsDuotone.pencilSimple, size: 18),
+                label: const Text('แก้ไข'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          _InfoTile(icon: PhosphorIconsRegular.phone, label: 'เบอร์โทรศัพท์', value: user?.phone ?? '-'),
+          // แอดมินไม่มีห้องพัก จึงแสดงเลขห้องเฉพาะผู้พักทั่วไป
+          if (user?.isAdmin != true)
+            _InfoTile(icon: PhosphorIconsRegular.door, label: 'ห้องพัก', value: user?.room ?? '-'),
           const SizedBox(height: 24),
           const Text('การตั้งค่า', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
           const SizedBox(height: 10),
@@ -87,7 +106,7 @@ class ProfilePage extends StatelessWidget {
             child: SwitchListTile(
               value: themeProvider.isDarkMode,
               activeColor: AppColors.primary,
-              secondary: const Icon(Icons.dark_mode_outlined),
+              secondary: const PhosphorIcon(PhosphorIconsDuotone.moon),
               title: const Text('โหมดมืด (Dark Mode)'),
               subtitle: const Text('บันทึกค่าไว้ด้วย SharedPreferences'),
               onChanged: (_) => themeProvider.toggleTheme(),
@@ -99,20 +118,34 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 10),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.groups_outlined, color: AppColors.primary),
+                leading: const PhosphorIcon(PhosphorIconsDuotone.usersThree, color: AppColors.primary),
                 title: const Text('รายชื่อผู้พักทั้งหมด'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const PhosphorIcon(PhosphorIconsDuotone.caretRight),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminResidentsPage()),
                 ),
               ),
             ),
           ],
+          const SizedBox(height: 24),
+          const Text('เกี่ยวกับแอป', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          const SizedBox(height: 10),
+          Card(
+            child: ListTile(
+              leading: const PhosphorIcon(PhosphorIconsDuotone.info, color: AppColors.primary),
+              title: const Text('เกี่ยวกับโปรเจกต์'),
+              subtitle: const Text('ข้อมูลผู้จัดทำโปรเจกต์ DormEase'),
+              trailing: const PhosphorIcon(PhosphorIconsDuotone.caretRight),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AboutProjectPage()),
+              ),
+            ),
+          ),
           const SizedBox(height: 28),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.logout, color: AppColors.danger),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.signOut, color: AppColors.danger),
               label: const Text('ออกจากระบบ', style: TextStyle(color: AppColors.danger)),
               style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.danger)),
               onPressed: () async {

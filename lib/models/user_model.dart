@@ -8,6 +8,9 @@ class UserModel {
   final String room;
   final String role; // 'admin' หรือ 'resident'
   final DateTime? createdAt;
+  // true = แอดมินยืนยันแล้ว ใช้งานแอปได้ตามปกติ
+  // false = สมัครใหม่ รอแอดมินตรวจสอบและกดยืนยันก่อน
+  final bool isApproved;
 
   UserModel({
     required this.uid,
@@ -17,6 +20,7 @@ class UserModel {
     required this.room,
     this.role = 'resident',
     this.createdAt,
+    this.isApproved = true,
   });
 
   bool get isAdmin => role == 'admin';
@@ -32,6 +36,8 @@ class UserModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      // ผู้ใช้เดิมที่ยังไม่มีฟิลด์นี้ในฐานข้อมูล ถือว่ายืนยันแล้ว (true) เพื่อไม่ให้ถูกล็อกออก
+      isApproved: json['isApproved'] is bool ? json['isApproved'] as bool : true,
     );
   }
 
@@ -43,6 +49,7 @@ class UserModel {
       'room': room,
       'role': role,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
+      'isApproved': isApproved,
     };
   }
 
@@ -51,6 +58,7 @@ class UserModel {
     String? phone,
     String? room,
     String? role,
+    bool? isApproved,
   }) {
     return UserModel(
       uid: uid,
@@ -60,6 +68,7 @@ class UserModel {
       room: room ?? this.room,
       role: role ?? this.role,
       createdAt: createdAt,
+      isApproved: isApproved ?? this.isApproved,
     );
   }
 }
