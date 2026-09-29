@@ -16,17 +16,17 @@ const _teamMembers = <_TeamMember>[
   _TeamMember(
     name: 'กันต์นัย แก้ววันนา',
     studentId: '6721651971',
-    photoAsset: 'assets/images/team/member1_kannanai.png',
+    photoAsset: 'assets/images/team/member1_kandanai.png',
   ),
   _TeamMember(
     name: 'ปุญญาพัฒน์ สุขเจริญ',
     studentId: '6721652382',
-    photoAsset: 'assets/images/team/member2_punyapat.png',
+    photoAsset: 'assets/images/team/member2_punyapat.jpg',
   ),
   _TeamMember(
-    name: 'อรุณ นาท',
+    name: 'อารุณ นาท',
     studentId: '6721656183',
-    photoAsset: 'assets/images/team/member3_arun.png',
+    photoAsset: 'assets/images/team/member3_arun.jpg',
   ),
 ];
 
