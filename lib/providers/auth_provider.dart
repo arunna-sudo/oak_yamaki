@@ -35,13 +35,20 @@ class AuthProvider extends ChangeNotifier with LoadingStateMixin {
 
   Future<void> _onAuthChanged(fb_auth.User? user) async {
     _firebaseUser = user;
-    if (user != null) {
-      _userProfile = await _userService.getUserProfile(user.uid);
-    } else {
-      _userProfile = null;
+    
+    try {
+      if (user != null) {
+        _userProfile = await _userService.getUserProfile(user.uid);
+      } else {
+        _userProfile = null;
+      }
+    } catch (e) {
+      print("Error fetching user profile: $e");
+      _userProfile = null; 
+    } finally {
+      _initialized = true;
+      notifyListeners();
     }
-    _initialized = true;
-    notifyListeners();
   }
 
   Future<bool> register({

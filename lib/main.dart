@@ -24,7 +24,16 @@ Future<void> main() async {
   // เตรียมข้อมูล locale ภาษาไทยสำหรับการจัดรูปแบบวันที่ (package intl)
   await initializeDateFormatting('th');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // ใช้ try-catch ดัก Error Duplicate App ให้ข้ามไปทำงานต่อได้เลย
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      print('Firebase ถูก Initialize ไว้แล้ว ข้ามขั้นตอนนี้ไป');
+    } else {
+      print('เกิดข้อผิดพลาดในการรัน Firebase: $e');
+    }
+  }
 
   runApp(const DormEaseApp());
 }
